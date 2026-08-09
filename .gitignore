@@ -1,0 +1,18 @@
+# Virtual environment
+venv/
+.venv/
+env/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Streamlit local secrets -- NEVER commit this if you create one later
+.streamlit/secrets.toml
+
+# OS/editor cruft
+.DS_Store
+.vscode/*
+!.vscode/settings.json
+*.egg-info/
