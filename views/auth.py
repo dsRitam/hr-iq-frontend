@@ -36,6 +36,12 @@ def _login_form():
             return
         try:
             user = api_client.login(email, password)
+            try:
+                user["hr_features_access"] = api_client.get_my_hr_features_access(user["token"])
+            except api_client.ApiError:
+                # Login itself succeeded -- don't block on this secondary
+                # check. Landing page re-fetches it fresh anyway.
+                user["hr_features_access"] = False
             log_in(user)
             st.rerun()
         except api_client.ApiError as e:
@@ -75,9 +81,24 @@ def render():
     if logout_msg:
         st.warning(logout_msg)
 
+    sso_error = st.session_state.pop("_sso_error_message", None)
+    if sso_error:
+        st.error(sso_error)
+
     _, mid, _ = st.columns([1, 1.4, 1])
     with mid:
         st.container(height=10, border=False)
+
+        st.link_button(
+            "🔑  Sign in with Microsoft", api_client.sso_login_url(),
+            use_container_width=True, type="primary",
+        )
+        st.markdown(
+            "<p style='text-align:center; color:#9CA3AF; font-size:0.75rem; margin:0.7rem 0;'>"
+            "— or use your HR IQ password —</p>",
+            unsafe_allow_html=True,
+        )
+
         tab_login, tab_register = st.tabs(["Log in", "Register"])
         with tab_login:
             _login_form()

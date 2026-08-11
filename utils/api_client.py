@@ -207,3 +207,23 @@ def _parse_sse_data(data_lines: list[str]) -> dict:
         return json.loads(data_str) if data_str else {}
     except json.JSONDecodeError:
         return {"raw": data_str}
+
+
+
+def get_my_hr_features_access(token: str) -> bool:
+    """GET /me/hr-features-access -> {hr_features_access: bool}. Whether
+    the logged-in person can use HR IQ features specifically -- NOT
+    whether they're logged in at all (any real kpipartners.com person
+    can log in via SSO; this is the separate, per-app check)."""
+    resp = _request(
+        "GET", f"{API_BASE_URL}/me/hr-features-access", headers=_headers(token), timeout=DEFAULT_TIMEOUT
+    )
+    return bool(resp.json().get("hr_features_access", False))
+
+
+def sso_login_url() -> str:
+    """Not an API call -- just the backend URL the frontend should send
+    the browser to for 'Sign in with Microsoft'. The backend handles the
+    entire Microsoft round-trip and redirects back to FRONTEND_APP_URL
+    with token/email/hr_features_access (or sso_error) in the query string."""
+    return f"{API_BASE_URL}/auth/sso/login"
